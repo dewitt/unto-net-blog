@@ -182,7 +182,7 @@
 (defn copy-static-files! []
   "Copy a number of precanned files from data/ to war/."
   (doseq [file ["atom.xml" "favicon.ico" "robots.txt" "style.css" "last-post.html"]]
-    (copy-file (str "data/" file) (str "war/" file))))
+    (copy-file! (str "data/" file) (str "war/" file))))
 
 (defn archive-items-str [posts]
   (apply str (map #(str "<li><a href=\"/" (:slug %) ".html\">" (:title %) "</a></li>\n") (sort-by :datetime posts))))
@@ -199,8 +199,11 @@
                  :datetime "2012-05-06T07:10:33:000Z"
                  :date "May, 2012"})))
   
+(defn save-published-posts! []
+  (let [posts (filter (complement blacklisted?) (published-posts))]
+    (doseq [post posts] (save-post! post))
+    (copy-static-files!)
+    (write-archives-file! posts)))
+
 ;; Run this to dump and process posts to HTML.
-(let [posts (filter (complement blacklisted?) (published-posts))]
-  (doseq [post posts] (save-post! post))
-  (copy-static-files!)
-  (write-archives-file! posts))
+(save-published-posts!)
