@@ -167,17 +167,40 @@
     (limit count)
     (where {:post_status [like ["publish"]]})))
 
-(def blacklist
-  #{3 70 71})
+(defn blacklisted? [post]
+  "Skip these ids when saving posts."
+  (contains? #{3 70 71 316} (:id post)))
+
+(defn save-post! [post]
+  (let [path (str "war/" (:slug post) ".html")]
+    (spit path (to-html post))))
+
+(defn copy-file! [from to]
+  (if-let [contents (slurp from)]
+    (spit to contents)))
+
+(defn copy-static-files! []
+  "Copy a number of precanned files from data/ to war/."
+  (doseq [file ["atom.xml" "favicon.ico" "robots.txt" "style.css" "last-post.html"]]
+    (copy-file (str "data/" file) (str "war/" file))))
+
+(defn archive-items-str [posts]
+  (apply str (map #(str "<li><a href=\"/" (:slug %) ".html\">" (:title %) "</a></li>\n") (sort-by :datetime posts))))
   
-(defn save-published-post! [post]
-  (if (not (contains? blacklist (:id post)))
-    (let [path (str "war/" (:slug post) ".html")]
-      (spit path (to-html post)))))
+(defn list-of-posts [posts]
+  (str "<ul>\n" (archive-items-str posts) "</ul>\n"))
 
-(defn save-published-posts! [& [count]]
-  "Extract and save up to count posts in war/ as static HTML files."
-  (doseq [post (published-posts count)]
-    (save-published-post! post)))
-
-(save-published-posts!)
+(defn write-archives-file! [posts]
+  "Write out a static file 'archives.html' containing links to all of the other posts"
+  (let [content (list-of-posts posts)]
+    (save-post! {:slug "archives"
+                 :content content
+                 :title "Archives"
+                 :datetime "2012-05-06T07:10:33:000Z"
+                 :date "May, 2012"})))
+  
+;; Run this to dump and process posts to HTML.
+(let [posts (filter (complement blacklisted?) (published-posts))]
+  (doseq [post posts] (save-post! post))
+  (copy-static-files!)
+  (write-archives-file! posts))
