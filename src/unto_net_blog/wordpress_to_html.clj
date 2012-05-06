@@ -14,6 +14,7 @@
 (ns unto-net-blog.wordpress-to-html
   (:require [unto-net-blog.html5 :as html5])
   (:require [unto-net-blog.templates :as templates])
+  (:require [clojure.java.io :as io])
   (:require [clojure.string :as string])
   (:require [clojure.xml :as xml])  
   (:use [clj-time.coerce :only (from-sql-date)])
@@ -176,8 +177,9 @@
     (spit path (to-html post))))
 
 (defn copy-file! [from to]
-  (if-let [contents (slurp from)]
-    (spit to contents)))
+  (with-open [in (io/input-stream from)
+              out (io/output-stream to)]
+    (io/copy in out)))
 
 (defn copy-static-files! []
   "Copy a number of precanned files from data/ to war/."
