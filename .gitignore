@@ -1,5 +1,7 @@
-war/*.html
+*~
+.lein-deps-sum
 lib/
+war/*.html
 war/WEB-INF/lib/
 war/atom.xml
 war/favicon.ico
