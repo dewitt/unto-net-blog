@@ -1,0 +1,7 @@
+war/*.html
+lib/
+war/WEB-INF/lib/
+war/atom.xml
+war/favicon.ico
+war/robots.txt
+war/style.css
