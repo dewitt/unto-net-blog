@@ -183,7 +183,7 @@
 
 (defn copy-static-files! []
   "Copy a number of precanned files from data/ to war/."
-  (doseq [file ["atom.xml" "favicon.ico" "robots.txt" "style.css" "last-post.html"]]
+  (doseq [file ["atom.xml" "favicon.ico" "robots.txt" "style.css" "last-post.html" "google07820b23c4bce57b.html"]]
     (copy-file! (str "data/" file) (str "war/" file))))
 
 (defn archive-items-str [posts]
